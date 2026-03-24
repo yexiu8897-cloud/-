@@ -1,0 +1,52 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile information",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "User ID" },
+        "name": { "type": "string", "description": "User's display name" },
+        "email": { "type": "string", "description": "User's email address" },
+        "roleId": { "type": "string", "description": "User's role ID" },
+        "subRoleId": { "type": "string", "description": "User's sub-role ID (optional)" },
+        "lineId": { "type": "string", "description": "User's line ID (optional)" },
+        "shiftType": { "type": "string", "description": "User's shift preference (morning/night)" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Last update timestamp" }
+      },
+      "required": ["uid", "name", "email"]
+    },
+    "Shift": {
+      "title": "Shift",
+      "description": "A user's shift on a specific date",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "User ID" },
+        "date": { "type": "string", "description": "Date of the shift (YYYY-MM-DD)" },
+        "shiftId": { "type": "string", "description": "Shift ID (e.g., morning1, night, leave)" },
+        "roleId": { "type": "string", "description": "Role ID at the time of scheduling" },
+        "subRoleId": { "type": "string", "description": "Sub-role ID (optional)" },
+        "lineId": { "type": "string", "description": "Line ID (optional)" },
+        "leaveReason": { "type": "string", "description": "Reason for leave (if shiftId is leave)" },
+        "userName": { "type": "string", "description": "Denormalized user name for display" },
+        "roleName": { "type": "string", "description": "Resolved name of the role" },
+        "lineName": { "type": "string", "description": "Resolved name of the line" },
+        "shiftName": { "type": "string", "description": "Resolved name of the shift" },
+        "englishName": { "type": "string", "description": "English name of the user" },
+        "chineseName": { "type": "string", "description": "Chinese name of the user" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Last update timestamp" }
+      },
+      "required": ["uid", "date", "shiftId", "roleId", "userName", "updatedAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/User" },
+      "description": "User profiles"
+    },
+    "/shifts/{shiftDocId}": {
+      "schema": { "$ref": "#/entities/Shift" },
+      "description": "Shift records, document ID is usually {date}_{uid}"
+    }
+  }
+}

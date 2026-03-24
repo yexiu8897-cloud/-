@@ -1,0 +1,46 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    function isDocOwner() {
+      return isAuthenticated() && request.auth.uid == resource.data.uid;
+    }
+
+    function isValidUser() {
+      let data = request.resource.data;
+      return data.keys().hasAll(['uid', 'name', 'email']) &&
+             data.uid is string && data.uid.size() > 0 && data.uid.size() <= 128 &&
+             data.name is string && data.name.size() > 0 && data.name.size() <= 100 &&
+             data.email is string && data.email.size() > 0 && data.email.size() <= 100 &&
+             (!('roleId' in data) || (data.roleId is string && data.roleId.size() <= 50)) &&
+             (!('subRoleId' in data) || (data.subRoleId is string && data.subRoleId.size() <= 50)) &&
+             (!('lineId' in data) || (data.lineId is string && data.lineId.size() <= 50)) &&
+             (!('shiftType' in data) || (data.shiftType is string && data.shiftType.size() <= 50)) &&
+             (!('updatedAt' in data) || (data.updatedAt is string && data.updatedAt.size() <= 50));
+    }
+
+    function isValidShift() {
+      let data = request.resource.data;
+      return data.uid == request.auth.uid;
+    }
+
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      allow create: if isOwner(userId);
+      allow update: if isOwner(userId);
+    }
+
+    match /shifts/{shiftDocId} {
+      allow read, write: if isAuthenticated();
+    }
+  }
+}
